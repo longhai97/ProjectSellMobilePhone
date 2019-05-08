@@ -1,17 +1,29 @@
-const Koa         = require('koa');
-const nunjuck     = require('./nunjucks.provider');
-const routerLogin = require('./router/RouterLogin');
-const serve       = require('koa-static');
-const path        = require('path');
-const staticPath  = '/views/Admin';
+require('dotenv').config();
+const Koa          = require('koa');
+const config       = require('./knexfile');
+const knex         = require('knex')(config.development);
+const nunjuck      = require('./nunjucks.provider');
+const routerLogin  = require('./router/RouterLogin');
+const serve        = require('koa-static');
+const path         = require('path');
+const bodyParser   = require('koa-bodyparser');
+const authProvider = require('./auth/Auth.Provider');
+const userProvider = require('./user/UserProvider');
+const hasherProvider = require('./hasher/hasherProvider');
+const staticPath   = '/views/Admin';
 
 const app = new Koa();
 app.use(serve(
     path.join(__dirname, staticPath)
 ));
 
+app.use(hasherProvider(10));
+app.use(bodyParser());
 app.use(nunjuck());
+app.use(userProvider(knex));
+app.use(authProvider());
 app.use(routerLogin.routes());
-app.listen(6060, () => {
+
+app.listen(process.env.POST, () => {
     console.log('Server listen port 6060')
 });
