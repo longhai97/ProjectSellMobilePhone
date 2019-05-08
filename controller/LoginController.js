@@ -2,18 +2,34 @@ const KnexFile = require('../knexfile');
 const knex = require('knex')(KnexFile.development);
 
 class LoginController {
-    async getLogin(ctx, next) {
+
+    async getLogin(ctx) {
+        if (ctx.authenticator.check()) {
+            return ctx.redirect('/dashboard');
+        }
+
         ctx.render('login.html', true);
     }
 
     async postLogin(ctx, next) {
         const {username, password} = ctx.request.body;
         
-        let user = await ctx.authenticator.attempt(username, password);
+        try {
+            let user = await ctx.authenticator.attempt(username, password);    
 
-        ctx.body = {
-            user: user
+            ctx.authenticator.login(user);
+            ctx.redirect('/dashboard');
+
+        } catch(e) {
+            return ctx.redirect('/login');    
         }
+        
+    }
+
+    async logout(ctx) {
+        ctx.authenticator.logout();
+
+        ctx.redirect('/login');
     }
 }
 

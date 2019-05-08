@@ -7,16 +7,21 @@ const routerLogin  = require('./router/RouterLogin');
 const serve        = require('koa-static');
 const path         = require('path');
 const bodyParser   = require('koa-bodyparser');
+const session      = require('koa-session');
+
 const authProvider = require('./auth/Auth.Provider');
 const userProvider = require('./user/UserProvider');
 const hasherProvider = require('./hasher/hasherProvider');
 const staticPath   = '/views/Admin';
 
 const app = new Koa();
+
+app.keys = ['some-secret-key'];
+
 app.use(serve(
     path.join(__dirname, staticPath)
 ));
-
+app.use(session(app));
 app.use(hasherProvider(10));
 app.use(bodyParser());
 app.use(nunjuck());

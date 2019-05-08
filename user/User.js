@@ -9,6 +9,9 @@ class User {
         return this.password;
     }
 
+    getId() {
+        return this.id;
+    }
 }
 
 module.exports = User;
